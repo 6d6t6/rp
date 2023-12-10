@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radio Player</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Lexend Deca', sans-serif;
+        }
+
+        .player-container {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            animation: gradientAnimation 10s infinite alternate;
+        }
+
+        @keyframes gradientAnimation {
+            from {
+                background-position: 0%;
+            }
+            to {
+                background-position: 100%;
+            }
+        }
+
+        .player {
+            text-align: center;
+            color: white;
+        }
+
+        #album-cover {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="player-container">
+        <div class="background"></div>
+        <div class="player">
+            <h2 id="stream-name">Loading...</h2>
+            <p id="now-playing"></p>
+            <img id="album-cover" alt="Album Cover">
+            <audio id="radio-player" controls></audio>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Extract stream URL from URL parameters
+            const params = new URLSearchParams(window.location.search);
+            const radioUrl = params.get('radio');
+
+            // Set radio stream source
+            const radioPlayer = document.getElementById('radio-player');
+            radioPlayer.src = radioUrl;
+            radioPlayer.load();
+            radioPlayer.play();
+
+            // Fetch metadata and update UI
+            fetchMetadata(radioUrl);
+
+            // Function to fetch metadata and update UI
+            function fetchMetadata(url) {
+                // Fetch the radio stream
+                fetch(url, { method: 'HEAD' })
+                    .then(response => {
+                        // Check if the radio stream response has metadata
+                        const metadata = response.headers.get('icy-metaint');
+                        if (metadata) {
+                            // If metadata is present, update UI
+                            updateUIWithMetadata(url);
+                        } else {
+                            // If no metadata, display a default message
+                            displayNoInformation();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching metadata:', error);
+                        // Handle errors as needed
+                    });
+            }
+
+            // Function to update UI with metadata
+            function updateUIWithMetadata(url) {
+                // Use the 'onmetadata' event to capture metadata
+                radioPlayer.addEventListener('loadedmetadata', function () {
+                    // Extract metadata (replace with actual metadata properties)
+                    const streamName = radioPlayer.name || "Unknown Stream";
+                    const nowPlaying = radioPlayer.currentTrack || "Now Playing: Unknown";
+                    
+                    // Update UI with metadata
+                    document.getElementById('stream-name').innerText = streamName;
+                    document.getElementById('now-playing').innerText = nowPlaying;
+                });
+            }
+
+            // Function to display a default message when no information is available
+            function displayNoInformation() {
+                document.getElementById('stream-name').innerText = "No information available";
+                document.getElementById('now-playing').innerText = "";
+            }
+        });
+    </script>
+</body>
+</html>
