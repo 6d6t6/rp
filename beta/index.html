@@ -14,9 +14,19 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background: linear-gradient(45deg, #f06, #9f6);
             font-family: 'Dela Gothic One', cursive;
             color: white;
+            overflow: hidden;
+            animation: gradientAnimation 10s infinite alternate;
+        }
+
+        @keyframes gradientAnimation {
+            0% {
+                background: linear-gradient(45deg, #f06, #9f6);
+            }
+            100% {
+                background: linear-gradient(45deg, #9f6, #f06);
+            }
         }
 
         /* Style the radio info container */
@@ -46,7 +56,7 @@
 </head>
 <body>
     <div id="radioInfo">
-        <h1 id="streamName"></h1>
+        <h1 id="streamName">No information available</h1>
         <p id="nowPlaying"></p>
     </div>
 
@@ -105,7 +115,7 @@
 
             // Display the stream name
             const streamNameElement = document.getElementById('streamName');
-            streamNameElement.textContent = streamName ? streamName : '';
+            streamNameElement.textContent = streamName ? streamName : 'No information available';
 
             // Display the now playing information
             const nowPlayingElement = document.getElementById('nowPlaying');
