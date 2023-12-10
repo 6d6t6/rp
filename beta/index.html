@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radio Player (by IMP)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        /* Style the body to fill the viewport */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(45deg, #f06, #9f6);
+            font-family: 'Dela Gothic One', cursive;
+            color: white;
+        }
+
+        /* Style the radio info container */
+        #radioInfo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Style the video container */
+        body::before {
+            content: "";
+            padding-top: 56.25%; /* 16:9 aspect ratio (9 / 16 * 100) */
+            display: block;
+        }
+
+        /* Style the video element */
+        video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="radioInfo">
+        <h1 id="streamName"></h1>
+        <p id="nowPlaying"></p>
+    </div>
+
+    <video id="radioPlayer" controls autoplay playsinline>
+        Your browser does not support the video tag.
+    </video>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Get the URL parameter named 'radio' (e.g., ?radio=https://example.com/stream.m3u8)
+            const urlParams = new URLSearchParams(window.location.search);
+            const radioUrl = urlParams.get('radio');
+
+            if (radioUrl) {
+                // Check if the URL is an HLS stream (ends with .m3u8)
+                if (radioUrl.endsWith('.m3u8')) {
+                    // Play HLS stream
+                    playHLSStream(radioUrl);
+                } else {
+                    // Set the video source to the URL parameter value
+                    const radioPlayer = document.getElementById('radioPlayer');
+                    radioPlayer.src = radioUrl;
+
+                    // Display radio metadata (if available)
+                    displayRadioMetadata(radioPlayer);
+                }
+            }
+        });
+
+        // Function to play HLS stream
+        function playHLSStream(url) {
+            const radioPlayer = document.getElementById('radioPlayer');
+
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(radioPlayer);
+                hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                    // Start playing the radio after manifest is parsed
+                    radioPlayer.play();
+                });
+            } else if (radioPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                radioPlayer.src = url;
+                radioPlayer.addEventListener('loadedmetadata', function () {
+                    // Start playing the radio after metadata is loaded
+                    radioPlayer.play();
+                });
+            }
+        }
+
+        // Function to display radio metadata
+        function displayRadioMetadata(player) {
+            // Get the stream name and now playing information (if available)
+            const streamName = player.getAttribute('data-name');
+            const nowPlaying = player.getAttribute('data-nowplaying');
+
+            // Display the stream name
+            const streamNameElement = document.getElementById('streamName');
+            streamNameElement.textContent = streamName ? streamName : '';
+
+            // Display the now playing information
+            const nowPlayingElement = document.getElementById('nowPlaying');
+            nowPlayingElement.textContent = nowPlaying ? `Now Playing: ${nowPlaying}` : '';
+        }
+    </script>
+</body>
+</html>
